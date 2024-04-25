@@ -3,77 +3,112 @@ import os
 import random
 
 
-def load_file(file_path):
-    data = []
-    with open(file_path, 'r') as file:
-        csv_reader = csv.reader(file)
-        for row in csv_reader:
-            data.append(row)
+def load_csv(file_path):
+    if not os.path.isfile(file_path):
+        print("Файл не найден.")
+        return None
+
+    with open(file_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        data = list(reader)
+
     return data
 
+def show(data, output_type="top", num_rows=5, separator=","):
 
-def show(data, output_type='top', num_rows=5, separator=','):
-    if output_type == 'bottom':
-        start_index = len(data) - num_rows
-    elif output_type == 'random':
-        start_index = random.randint(0, len(data) - num_rows)
+    if not data:
+        return
+
+    if output_type == "bottom":
+        data = data[-num_rows:]
+    elif output_type == "random":
+        data = random.sample(data, min(num_rows, len(data)))
     else:
-        start_index = 0
+        data = data[:num_rows]
 
-    end_index = min(start_index + num_rows, len(data))
-    for i in range(start_index, end_index):
-        print(separator.join(data[i]))
+    for row in data:
+        print(separator.join(row))
 
 
-def info(data):
-    num_rows = len(data) - 1
-    num_columns = len(data[0])
-    print(f'Number of rows: {num_rows}x{num_columns}')
+def info(data, separator=","):
+    if not data:
+        return
 
     header = data[0]
-    for i, col_name in enumerate(header):
-        non_empty_count = sum(1 for row in data[1:] if row[i])
-        col_type = type(data[1][i]).__name__
-        print(f'{col_name}  {non_empty_count}  {col_type}')
+    data = data[1:]
+
+    num_rows = len(data)
+    num_cols = len(header)
+
+    print(f"Количество строк с данными: {num_rows}x{num_cols}")
+
+    for i, field in enumerate(header):
+        non_empty_count = sum(1 for row in data if row[i])
+        field_type = "string" if all(isinstance(row[i], str) for row in data) else "int"
+        print(f"{field:10} {non_empty_count:5} {field_type}")
 
 
 def del_nan(data):
-    cleaned_data = [data[0]]
-    for row in data[1:]:
+    if not data:
+        return
+
+    header = data[0]
+    data = data[1:]
+
+    cleaned_data = [header]
+    for row in data:
         if all(row):
             cleaned_data.append(row)
+
     return cleaned_data
 
 
-def make_ds(data, ratio=0.7):
-    num_train = int(len(data) * ratio)
+def make_ds(file_path):
 
-    learning_data = [data[0]] + data[1:num_train + 1]
-    testing_data = [data[0]] + data[num_train + 1:]
+    data = load_csv(file_path)
+    if not data:
+        return
 
-    os.makedirs('workdata/Learning', exist_ok=True)
-    os.makedirs('workdata/Testing', exist_ok=True)
+    output_dir = os.path.join(os.path.dirname(file_path), "workdata")
+    learning_dir = os.path.join(output_dir, "Learning")
+    testing_dir = os.path.join(output_dir, "Testing")
 
-    with open('workdata/Learning/train.csv', 'w', newline='') as file:
-        csv_writer = csv.writer(file)
-        csv_writer.writerows(learning_data)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    if not os.path.exists(learning_dir):
+        os.makedirs(learning_dir)
+    if not os.path.exists(testing_dir):
+        os.makedirs(testing_dir)
 
-    with open('workdata/Testing/test.csv', 'w', newline='') as file:
-        csv_writer = csv.writer(file)
-        csv_writer.writerows(testing_data)
+    random.shuffle(data)
+    split_index = int(len(data) * 0.7)
+
+    learning_data = data[:split_index]
+    testing_data = data[split_index:]
+
+    with open(os.path.join(learning_dir, "train.csv"), 'w', newline='', encoding='utf-8') as learning_file:
+        writer = csv.writer(learning_file)
+        writer.writerows(learning_data)
+
+    with open(os.path.join(testing_dir, "test.csv"), 'w', newline='', encoding='utf-8') as testing_file:
+        writer = csv.writer(testing_file)
+        writer.writerows(testing_data)
 
 
-file_path = 'data.csv'
-data = load_file(file_path)
+# Пример использования функций:
+file_path = "Titanic.csv"
 
-# Show the data
-show(data, output_type='random', num_rows=5, separator=',')
+# Загрузка CSV файла
+data = load_csv(file_path)
 
-# Info about the data
+# Показать данные CSV файла
+show(data, output_type="random", num_rows=10, separator=",")
+
+# Получить информацию о данных CSV файла
 info(data)
 
-# Delete rows with NaN values
+# Удалить строки с пустыми значениями
 cleaned_data = del_nan(data)
 
-# Make training and testing datasets
-make_ds(cleaned_data, ratio=0.7)
+# Создать обучающий и тестовый наборы данных
+make_ds(file_path)
