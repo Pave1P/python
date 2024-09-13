@@ -1,0 +1,35 @@
+# def check(s):
+#     st = []
+#     bracket_pairs = {'(': ')', '{': '}', '[': ']'}
+#     # Проходим по каждому символу строки
+#     for char in s:
+#         if char in bracket_pairs.keys():
+#             st.append(char)
+#         elif char in bracket_pairs.values():
+#             if len(st) > 0 and bracket_pairs[st[-1]] == char:
+#                 st.pop()
+#             else:
+#                 print("Строка не существует")
+#                 return
+#     # Если стек пуст по окончанию проверки, то все скобки сбалансированы
+#     if len(st) == 0:
+#         print("Строка существует")
+#     else:
+#         print("Строка не существует")
+
+
+s=[input()]
+ansver = 0
+math_el = ["*", "/", "-", "+"]
+for i in range(1,len(s)-1):
+    print(s[i])
+    if s[i] == math_el[0]:
+        ansver = int(s[i - 1]) * int(s[i + 1])
+    elif s[i] == math_el[1]:
+        ansver = int(s[i - 1]) / int(s[i + 1])
+    elif s[i] == math_el[2]:
+        ansver = int(s[i - 1]) - int(s[i + 1])
+    elif s[i] == math_el[3]:
+        ansver = int(s[i - 1]) + int(s[i + 1])
+
+print(s)
