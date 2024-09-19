@@ -1,0 +1,12 @@
+res = []
+x = int(input())
+for k in range(0, int(x ** 0.5)):
+    if 3**k>x:break
+    for l in range(0, int(x ** 0.5)):
+        if 3**k*5**l > x: break
+        for m in range(0, int(x ** 0.5)):
+            if 3**k*5**l*7**m> x: break
+
+            res.append(3 ** k * 5 ** l * 7 ** m)
+res=sorted(set(res))
+print(res)
