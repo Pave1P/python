@@ -1,0 +1,19 @@
+def comb_sort(sequence):
+    step = int(len(sequence) / 1.247)
+    swap = 1
+    while step > 1 or swap > 0:
+        swap = 0
+        i = 0
+        while i + step < len(sequence):
+            if sequence[i] > sequence[i + step]:
+                sequence[i], sequence[i + step] = sequence[i + step], sequence[i]
+                swap += 1
+            i += 1
+        if step > 1:
+            step = int(step / 1.247)
+
+# Пример использования
+sequence = [5, 0, -2, 7, 3]
+print("До сортировки:", sequence)
+comb_sort(sequence)
+print("После сортировки:", sequence)
