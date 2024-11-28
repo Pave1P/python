@@ -1,0 +1,119 @@
+def parse_bst(string):
+    def helper(index):
+        if index >= len(string):
+            return None, index
+        if string[index].isdigit():
+            value = ''
+            while index < len(string) and string[index].isdigit():
+                value += string[index]
+                index += 1
+            node = {'value': int(value), 'left': None, 'right': None}
+            if index < len(string) and string[index] == '(':
+                index += 1
+                node['left'], index = helper(index)
+                if string[index] == ',':
+                    index += 1
+                    node['right'], index = helper(index)
+                if string[index] == ')':
+                    index += 1
+            return node, index
+        return None, index
+
+    tree, _ = helper(0)
+    return tree
+
+
+def bst_to_string(node):
+    if not node:
+        return ''
+    left = bst_to_string(node['left'])
+    right = bst_to_string(node['right'])
+    if left or right:
+        return f"{node['value']}({left},{right})"
+    return str(node['value'])
+
+
+def search_bst(node, value):
+    """Ищет значение в дереве."""
+    if not node:
+        return None
+    if node['value'] == value:
+        return node
+    if value < node['value']:
+        return search_bst(node['left'], value)
+    return search_bst(node['right'], value)
+
+
+def add_bst(node, value):
+    """Добавляет значение в дерево."""
+    if not node:
+        return {'value': value, 'left': None, 'right': None}
+    if value < node['value']:
+        node['left'] = add_bst(node['left'], value)
+    elif value > node['value']:
+        node['right'] = add_bst(node['right'], value)
+    return node
+
+
+def delete_bst(node, value):
+    """Удаляет значение из дерева."""
+    if not node:
+        return None
+    if value < node['value']:
+        node['left'] = delete_bst(node['left'], value)
+    elif value > node['value']:
+        node['right'] = delete_bst(node['right'], value)
+    else:
+        if not node['left']:
+            return node['right']
+        if not node['right']:
+            return node['left']
+        successor = node['right']
+        while successor['left']:
+            successor = successor['left']
+        node['value'] = successor['value']
+        node['right'] = delete_bst(node['right'], successor['value'])
+    return node
+
+
+def menu():
+    """Меню для работы с деревом."""
+    tree = None
+    while True:
+        print("\nМеню:")
+        print("1. Ввести дерево (линейно-скобочная запись)")
+        print("2. Добавить вершину")
+        print("3. Удалить вершину")
+        print("4. Найти вершину")
+        print("5. Вывести дерево (линейно-скобочная запись)")
+        print("6. Выход")
+        choice = input("Ваш выбор: ")
+
+        if choice == '1':
+            string = input("Введите дерево (линейно-скобочная запись): ")
+            tree = parse_bst(string)
+        elif choice == '2':
+            value = int(input("Введите значение для добавления: "))
+            tree = add_bst(tree, value)
+        elif choice == '3':
+            value = int(input("Введите значение для удаления: "))
+            tree = delete_bst(tree, value)
+        elif choice == '4':
+            value = int(input("Введите значение для поиска: "))
+            result = search_bst(tree, value)
+            if result:
+                print(f"Значение {value} найдено.")
+            else:
+                print(f"Значение {value} не найдено.")
+        elif choice == '5':
+            if tree:
+                print("Текущее дерево:", bst_to_string(tree))
+            else:
+                print("Дерево пусто.")
+        elif choice == '6':
+            print("Выход. Итоговое дерево:", bst_to_string(tree))
+            break
+        else:
+            print("Некорректный выбор. Попробуйте снова.")
+
+menu()
